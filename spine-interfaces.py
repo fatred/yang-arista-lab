@@ -36,22 +36,31 @@ def create_interface_config(provider, port_name, port_desc, port_ip, port_cidr):
 
     # create the object model instance
     interface = openconfig_interfaces.Interfaces.Interface()
-    # set the name
     interface.name = port_name
     interface.config.name = interface.name
     interface.config.description = port_desc
     interface.config.enabled = True
+#    interface.ethernet.config.duplex_mode = "FULL"
+#    interface.ethernet.config.auto_negotiate = True
+
+    # subinterface for ip address
     subinterface = interface.subinterfaces.Subinterface()
     subinterface.index = 0
     subinterface.config.index = 0
+    subinterface.config.description = port_desc
     subinterface.ipv4 = subinterface.Ipv4()
-    address = subinterface.ipv4.Addresses.Address()
+    
+    # address stuff
+    address_list = subinterface.ipv4.Addresses()
+    address = address_list.Address()
     address.ip = port_ip
-    address.config.ip = address.ip
+    address.config.ip = port_ip
     address.config.prefix_length = port_cidr
+    
+    # put the model together
     subinterface.ipv4.addresses.address.append(address)
     interface.subinterfaces.subinterface.append(subinterface)
-    
+
     # configure the action type in gnmi
     interface.yfilter = YFilter.update
 
@@ -67,32 +76,32 @@ if __name__ == "__main__":
     # setup shit
     repository = Repository(repo)
     spine1_sp = create_provider(repository, '192.168.77.11', port, username, password)
-    spine2_sp = create_provider(repository, '192.168.77.12', port, username, password)
+#    spine2_sp = create_provider(repository, '192.168.77.12', port, username, password)
 
     # do shit
     # spine 1
-    s1_l1_ok = create_interface_config(spine1_sp, 'Ethernet1', 'Leaf1 Port', '169.254.11.1', 30)
+    s1_l1_ok = create_interface_config(spine1_sp, 'Ethernet1', 'Leaf1 Port', '100.64.11.1', 30)
     if s1_l1_ok: 
         print("Spine1 Leaf1: ok")
     else:
         print("Spine1 Leaf1: nok")
-    s1_l2_ok = create_interface_config(spine1_sp, 'Ethernet2', 'Leaf2 Port', '169.254.12.1', 30)
+    s1_l2_ok = create_interface_config(spine1_sp, 'Ethernet2', 'Leaf2 Port', '100.64.12.1', 30)
     if s1_l2_ok: 
         print("Spine1 Leaf2: ok")
     else:
         print("Spine1 Leaf2: nok")
     
     # spine 2
-    s2_l1_ok = create_interface_config(spine2_sp, 'Ethernet1', 'Leaf1 Port', '169.254.21.1', 30)
-    if s2_l1_ok: 
-        print("Spine2 Leaf1: ok")
-    else:
-        print("Spine2 Leaf1: nok")
-    s2_l2_ok = create_interface_config(spine2_sp, 'Ethernet2', 'Leaf2 Port', '169.254.22.1', 30)
-    if s2_l2_ok: 
-        print("Spine2 Leaf2: ok")
-    else:
-        print("Spine2 Leaf2: nok")
+#    s2_l1_ok = create_interface_config(spine2_sp, 'Ethernet1', 'Leaf1 Port', '100.64.21.1', 30)
+#    if s2_l1_ok: 
+#        print("Spine2 Leaf1: ok")
+#    else:
+#        print("Spine2 Leaf1: nok")
+#    s2_l2_ok = create_interface_config(spine2_sp, 'Ethernet2', 'Leaf2 Port', '100.64.22.1', 30)
+#    if s2_l2_ok: 
+#        print("Spine2 Leaf2: ok")
+#    else:
+#        print("Spine2 Leaf2: nok")
     exit()
 
                                                                                                                                             
